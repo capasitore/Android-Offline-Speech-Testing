@@ -1,10 +1,16 @@
 package com.domkaukinen.devicespeechtesting;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +34,9 @@ public class SpeechActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_speech);
         context = this;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            createPermissions();
+        }
         speechButton = (Button)findViewById(R.id.buttonSpeech);
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -43,6 +52,17 @@ public class SpeechActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @TargetApi(23)
+    public void createPermissions(){
+        String permission = Manifest.permission.RECORD_AUDIO;
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+            if(!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
+                requestPermissions(new String[]{permission},
+                        0);
+            }
+        }
     }
 
 
@@ -90,9 +110,37 @@ public class SpeechActivity extends AppCompatActivity {
         @Override
         public void onError(int error)
         {
-            Toast.makeText(context, "error, listening", Toast.LENGTH_SHORT).show();
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-            //Log.d(TAG, "error = " + error);
+            switch(error){
+                case SpeechRecognizer.ERROR_AUDIO:
+                    Toast.makeText(context, "error, audio", Toast.LENGTH_SHORT).show();
+
+                    break;
+                case SpeechRecognizer.ERROR_CLIENT:
+                    Toast.makeText(context, "error, client", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_NETWORK:
+                    Toast.makeText(context, "error, network", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                    Toast.makeText(context, "error, network timeout", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                    Toast.makeText(context, "error, insufficient permissions", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_NO_MATCH:
+                    Toast.makeText(context, "error, no match", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                    Toast.makeText(context, "error, recognizer busy", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_SERVER:
+                    Toast.makeText(context, "error, server", Toast.LENGTH_SHORT).show();
+                    break;
+                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                    Toast.makeText(context, "error, speech timeout", Toast.LENGTH_SHORT).show();
+                    break;
+
+            }
         }
 
         @Override
